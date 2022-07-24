@@ -1,11 +1,11 @@
-use crate::sodoku::Sodoku;
+use crate::sudoku::Sudoku;
 
-mod sodoku;
+mod sudoku;
 
 fn main() {
-    let mut x = Sodoku::empty();
+    let mut x = Sudoku::empty();
     for _ in 0..81 {
         x.add_random();
     }
-    println!("{:?}", x);
+    println!("{}", x);
 }
