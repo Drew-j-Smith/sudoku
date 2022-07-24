@@ -1,6 +1,7 @@
 use enumset::EnumSet;
 use enumset::EnumSetType;
 use rand;
+use rand::thread_rng;
 use rand::Rng;
 use std::collections::HashSet;
 use std::fmt;
@@ -50,7 +51,7 @@ impl std::fmt::Display for SudokuTileState {
 }
 
 #[derive(Eq, Hash, PartialEq, Clone, Copy)]
-struct Position {
+pub struct Position {
     row: usize,
     col: usize,
 }

@@ -18,9 +18,7 @@ fn main() {
             Ok(_) => {}
             Err(e) => {
                 println!("{:?}", e);
-                if let SudokuError::BoardFull = e {
-                    break;
-                }
+                break;
             }
         };
     }

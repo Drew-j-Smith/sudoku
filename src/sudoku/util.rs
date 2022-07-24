@@ -35,14 +35,14 @@ impl Sudoku {
     }
 
     pub fn create_from_board(board: [[Option<SudokuTile>; 9]; 9]) -> Sudoku {
-        Sudoku {
-            board: board.map(|row| {
-                row.map(|x| match x {
-                    Some(x) => SudokuTileState::Set(x),
-                    None => SudokuTileState::Unset(EnumSet::empty()),
-                })
-            }),
-            unset_positions: HashSet::new(),
+        let mut res = Sudoku::empty();
+        for row in 0..9 {
+            for col in 0..9 {
+                if let Some(x) = board[row][col] {
+                    res.update_for_new_value(Position { row, col }, x);
+                }
+            }
         }
+        res
     }
 }

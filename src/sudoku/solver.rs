@@ -3,18 +3,14 @@ use super::*;
 impl Sudoku {
     fn get_random_unset(&self) -> Option<Position> {
         if self.unset_positions.is_empty() {
-            return Option::None;
+            return None;
         }
-        let index = rand::thread_rng().gen_range(0..self.unset_positions.len());
-        match self.unset_positions.iter().nth(index) {
-            Some(position) => Option::Some((*position).clone()),
-            None => Option::None,
-        }
+        let index = thread_rng().gen_range(0..self.unset_positions.len());
+        self.unset_positions.iter().nth(index).map(|x| *x)
     }
 
-    fn set_random_from_states(
-        &mut self,
-        position: Position,
+    fn get_random_from_states(
+        &self,
         states: EnumSet<SudokuTile>,
     ) -> Result<SudokuTile, SudokuError> {
         if states.is_empty() {
@@ -22,32 +18,21 @@ impl Sudoku {
         }
         let index = rand::thread_rng().gen_range(0..states.len());
         match states.iter().nth(index) {
-            Some(x) => {
-                self.board[position.row][position.col] = SudokuTileState::Set(x);
-                Result::Ok(x)
-            }
+            Some(x) => Result::Ok(x),
             None => Result::Err(SudokuError::NoValidSudokuTile),
         }
     }
 
-    fn set_random(&mut self, position: Position) -> Result<SudokuTile, SudokuError> {
+    fn get_random(&self, position: Position) -> Result<SudokuTile, SudokuError> {
         match self.board[position.row][position.col] {
             SudokuTileState::Set(_) => Result::Err(SudokuError::BoardHashMapDisagreement),
-            SudokuTileState::Unset(x) => self.set_random_from_states(position, x),
+            SudokuTileState::Unset(x) => self.get_random_from_states(x),
         }
     }
 
     pub fn add_random(&mut self) -> Result<SudokuTile, SudokuError> {
         match self.get_random_unset() {
-            Some(position) => {
-                self.unset_positions.remove(&position);
-                let res = self.set_random(position);
-                match res {
-                    Ok(new_state) => self.update_for_new_value(position, new_state),
-                    Err(_) => {}
-                }
-                res
-            }
+            Some(position) => self.update_random_value(position),
             None => Result::Err(SudokuError::BoardFull),
         }
     }
@@ -68,20 +53,22 @@ impl Sudoku {
                     }
                 }
             }
-            let position = pos.clone();
-            self.unset_positions.remove(&pos);
-            let res = self.set_random(position);
-            match res {
-                Ok(new_state) => self.update_for_new_value(position, new_state),
-                Err(_) => {}
-            }
-            res
+            self.update_random_value(pos)
         } else {
             Result::Err(SudokuError::BoardHashMapDisagreement)
         }
     }
 
-    fn update_for_new_value(&mut self, position: Position, new_state: SudokuTile) {
+    pub fn update_random_value(&mut self, position: Position) -> Result<SudokuTile, SudokuError> {
+        self.get_random(position).and_then(|x| {
+            self.update_for_new_value(position, x);
+            Result::Ok(x)
+        })
+    }
+
+    pub fn update_for_new_value(&mut self, position: Position, new_state: SudokuTile) {
+        self.unset_positions.remove(&position);
+        self.board[position.row][position.col] = SudokuTileState::Set(new_state);
         self.update_row(position, new_state);
         self.update_col(position, new_state);
         self.update_cell(position, new_state);
