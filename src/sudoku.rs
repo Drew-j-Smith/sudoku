@@ -18,6 +18,7 @@ pub enum SudokuTile {
     Nine = 9,
 }
 
+#[derive(Debug)]
 pub enum SudokuError {
     NoValidSudokuTile,
     BoardHashMapDisagreement,
@@ -31,7 +32,7 @@ impl std::fmt::Display for SudokuTile {
 }
 
 #[derive(Clone, Copy)]
-pub enum SudokuTileState {
+enum SudokuTileState {
     Set(SudokuTile),
     Unset(EnumSet<SudokuTile>),
 }
@@ -46,7 +47,7 @@ impl std::fmt::Display for SudokuTileState {
 }
 
 #[derive(Eq, Hash, PartialEq, Clone, Copy)]
-pub struct Position {
+struct Position {
     row: usize,
     col: usize,
 }
@@ -143,6 +144,35 @@ impl Sudoku {
         }
     }
 
+    pub fn add_least_entropy(&mut self) -> Result<SudokuTile, SudokuError> {
+        if self.unset_positions.is_empty() {
+            return Result::Err(SudokuError::BoardFull);
+        }
+        let mut pos = self.unset_positions.iter().next().expect("").clone();
+        let min = self.board[pos.row][pos.col];
+        if let SudokuTileState::Unset(mut min) = min {
+            for ele in &self.unset_positions {
+                let curr = self.board[ele.row][ele.col];
+                if let SudokuTileState::Unset(curr) = curr {
+                    if curr.len() < min.len() {
+                        min = curr;
+                        pos = *ele;
+                    }
+                }
+            }
+            let position = pos.clone();
+            self.unset_positions.remove(&pos);
+            let res = self.set_random(position);
+            match res {
+                Ok(new_state) => self.update_for_new_value(position, new_state),
+                Err(_) => {}
+            }
+            res
+        } else {
+            Result::Err(SudokuError::BoardHashMapDisagreement)
+        }
+    }
+
     fn update_for_new_value(&mut self, position: Position, new_state: SudokuTile) {
         self.update_row(position, new_state);
         self.update_col(position, new_state);
@@ -156,6 +186,7 @@ impl Sudoku {
                 if x.len() == 1 && x != new_state {
                     if let Some(x) = x.iter().next() {
                         self.board[position.row][position.col] = SudokuTileState::Set(x);
+                        self.unset_positions.remove(&position);
                         self.update_for_new_value(position, x);
                     }
                 } else {
@@ -184,6 +215,38 @@ impl Sudoku {
             for col in get_range(position.col) {
                 self.update_single_cell(Position { row, col }, new_state)
             }
+        }
+    }
+
+    pub fn is_filled(&self) -> bool {
+        for ele in &self.unset_positions {
+            if let SudokuTileState::Unset(x) = self.board[ele.row][ele.col] {
+                if x.len() > 1 {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    pub fn get_board(&self) -> [[Option<SudokuTile>; 9]; 9] {
+        self.board.map(|row| {
+            row.map(|x| match x {
+                SudokuTileState::Set(x) => Some(x),
+                SudokuTileState::Unset(_) => None,
+            })
+        })
+    }
+
+    pub fn create_from_board(board: [[Option<SudokuTile>; 9]; 9]) -> Sudoku {
+        Sudoku {
+            board: board.map(|row| {
+                row.map(|x| match x {
+                    Some(x) => SudokuTileState::Set(x),
+                    None => SudokuTileState::Unset(EnumSet::empty()),
+                })
+            }),
+            unset_positions: HashSet::new(),
         }
     }
 }
