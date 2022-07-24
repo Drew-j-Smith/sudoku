@@ -52,8 +52,8 @@ impl std::fmt::Display for SudokuTileState {
 
 #[derive(Eq, Hash, PartialEq, Clone, Copy)]
 pub struct Position {
-    row: usize,
-    col: usize,
+    pub row: usize,
+    pub col: usize,
 }
 
 pub struct Sudoku {
