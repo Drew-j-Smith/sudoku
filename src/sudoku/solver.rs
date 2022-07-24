@@ -1,98 +1,6 @@
-use enumset::EnumSet;
-use enumset::EnumSetType;
-use rand;
-use rand::Rng;
-use std::collections::HashSet;
-use std::fmt;
-
-#[derive(EnumSetType)]
-pub enum SudokuTile {
-    One = 1,
-    Two = 2,
-    Three = 3,
-    Four = 4,
-    Five = 5,
-    Six = 6,
-    Seven = 7,
-    Eight = 8,
-    Nine = 9,
-}
-
-#[derive(Debug)]
-pub enum SudokuError {
-    NoValidSudokuTile,
-    BoardHashMapDisagreement,
-    BoardFull,
-}
-
-impl std::fmt::Display for SudokuTile {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", *self as i32)
-    }
-}
-
-#[derive(Clone, Copy)]
-enum SudokuTileState {
-    Set(SudokuTile),
-    Unset(EnumSet<SudokuTile>),
-}
-
-impl std::fmt::Display for SudokuTileState {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            SudokuTileState::Set(x) => x.fmt(f),
-            SudokuTileState::Unset(_) => write!(f, " "),
-        }
-    }
-}
-
-#[derive(Eq, Hash, PartialEq, Clone, Copy)]
-struct Position {
-    row: usize,
-    col: usize,
-}
-
-pub struct Sudoku {
-    board: [[SudokuTileState; 9]; 9],
-    unset_positions: HashSet<Position>,
-}
-
-impl std::fmt::Display for Sudoku {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut res = write!(f, "-------------------\n");
-        for row in self.board {
-            for ele in row {
-                res = res.and(write!(f, "|{}", ele));
-            }
-            res = res.and(write!(f, "|\n-------------------\n"));
-        }
-        res
-    }
-}
-
-fn get_range(index: usize) -> std::ops::Range<usize> {
-    match index {
-        0..=2 => 0..3,
-        3..=5 => 3..6,
-        6..=8 => 6..9,
-        _ => panic!("invlaid index"),
-    }
-}
+use super::*;
 
 impl Sudoku {
-    pub fn empty() -> Sudoku {
-        let mut unset_positions: HashSet<Position> = HashSet::new();
-        for row in 0..9 {
-            for col in 0..9 {
-                unset_positions.insert(Position { row, col });
-            }
-        }
-        Sudoku {
-            board: [[SudokuTileState::Unset(EnumSet::all()); 9]; 9],
-            unset_positions,
-        }
-    }
-
     fn get_random_unset(&self) -> Option<Position> {
         if self.unset_positions.is_empty() {
             return Option::None;
@@ -211,42 +119,18 @@ impl Sudoku {
     }
 
     fn update_cell(&mut self, position: Position, new_state: SudokuTile) {
+        fn get_range(index: usize) -> std::ops::Range<usize> {
+            match index {
+                0..=2 => 0..3,
+                3..=5 => 3..6,
+                6..=8 => 6..9,
+                _ => panic!("invlaid index"),
+            }
+        }
         for row in get_range(position.row) {
             for col in get_range(position.col) {
                 self.update_single_cell(Position { row, col }, new_state)
             }
-        }
-    }
-
-    pub fn is_filled(&self) -> bool {
-        for ele in &self.unset_positions {
-            if let SudokuTileState::Unset(x) = self.board[ele.row][ele.col] {
-                if x.len() > 1 {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    pub fn get_board(&self) -> [[Option<SudokuTile>; 9]; 9] {
-        self.board.map(|row| {
-            row.map(|x| match x {
-                SudokuTileState::Set(x) => Some(x),
-                SudokuTileState::Unset(_) => None,
-            })
-        })
-    }
-
-    pub fn create_from_board(board: [[Option<SudokuTile>; 9]; 9]) -> Sudoku {
-        Sudoku {
-            board: board.map(|row| {
-                row.map(|x| match x {
-                    Some(x) => SudokuTileState::Set(x),
-                    None => SudokuTileState::Unset(EnumSet::empty()),
-                })
-            }),
-            unset_positions: HashSet::new(),
         }
     }
 }
