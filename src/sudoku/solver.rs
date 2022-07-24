@@ -75,19 +75,8 @@ impl Sudoku {
     }
 
     fn update_single_cell(&mut self, position: Position, new_state: SudokuTile) {
-        match self.board[position.row][position.col] {
-            SudokuTileState::Set(_) => {}
-            SudokuTileState::Unset(x) => {
-                if x.len() == 1 && x != new_state {
-                    if let Some(x) = x.iter().next() {
-                        self.board[position.row][position.col] = SudokuTileState::Set(x);
-                        self.unset_positions.remove(&position);
-                        self.update_for_new_value(position, x);
-                    }
-                } else {
-                    self.board[position.row][position.col] = SudokuTileState::Unset(x - new_state);
-                }
-            }
+        if let SudokuTileState::Unset(x) = self.board[position.row][position.col] {
+            self.board[position.row][position.col] = SudokuTileState::Unset(x - new_state);
         }
     }
 
