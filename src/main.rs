@@ -1,8 +1,11 @@
 use crate::sudoku::{Position, Sudoku, SudokuTile};
 
 mod sudoku;
+mod sudoku2;
 
 fn main() {
+    let x = sudoku2::Sudoku::new();
+    println!("{x:?}");
     test2();
 }
 
