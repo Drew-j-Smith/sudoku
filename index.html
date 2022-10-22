@@ -6,19 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
   <script src='pkg/sudoku.js'></script>
-  <script> 
-    const { complete_sudoku } = wasm_bindgen;
-    (async () => {
-      await wasm_bindgen('./pkg/sudoku_bg.wasm');
-      let response = await fetch('https://sugoku.herokuapp.com/board?difficulty=easy');
-      let raw_json = await response.json();
-      let data = raw_json.board.reduce((arr, curr) => arr.concat(curr));
-      let res = complete_sudoku(data);
-      console.log(res);
-    })();
-  </script>
+  <script src="sudoku.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <p>test</p>
+  <h1>Sudoku</h1>
+  <h2 id="unsolved">Unsolved</h2>
+  <h2 id="solved">Solved</h2>
 </body>
 </html>
