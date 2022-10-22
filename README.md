@@ -9,5 +9,5 @@ cargo install wasm-pack
 ## Build
 
 ```sh
-wasm-pack build --target no-modules
+wasm-pack build --target web
 ```

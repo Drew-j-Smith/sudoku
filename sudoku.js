@@ -14,9 +14,9 @@ function createNode(arr) {
     return table;
 }
 
-const { complete_sudoku } = wasm_bindgen;
+import init, { complete_sudoku } from './pkg/sudoku.js';
 (async () => {
-    await wasm_bindgen('./pkg/sudoku_bg.wasm');
+    await init();
     let response = await fetch('https://sugoku.herokuapp.com/board?difficulty=easy');
     let raw_json = await response.json();
     let data = raw_json.board.reduce((arr, curr) => arr.concat(curr));
