@@ -14,32 +14,27 @@ impl Sudoku {
         }
     }
 
-    pub fn is_filled(&self) -> bool {
-        for ele in &self.unset_positions {
-            if let SudokuTileState::Unset(x) = self.board[ele.row][ele.col] {
-                if x.len() > 1 {
-                    return false;
-                }
-            }
+    pub fn create_from_arr(arr: &Box<[i32]>) -> Result<Sudoku, ()> {
+        if arr.len() != 81 {
+            return Err(());
         }
-        return true;
-    }
-
-    pub fn get_board(&self) -> [[Option<SudokuTile>; 9]; 9] {
-        self.board.map(|row| {
-            row.map(|x| match x {
-                SudokuTileState::Set(x) => Some(x),
-                SudokuTileState::Unset(_) => None,
-            })
-        })
-    }
-
-    pub fn create_from_board(board: [[Option<SudokuTile>; 9]; 9]) -> Sudoku {
         let mut res = Sudoku::empty();
         for row in 0..9 {
             for col in 0..9 {
-                if let Some(x) = board[row][col] {
-                    res.update_for_new_value(Position { row, col }, x);
+                if let Some(val) = num::FromPrimitive::from_i32(arr[(row * 9) + col]) {
+                    res.update_for_new_value(Position { row, col }, val);
+                }
+            }
+        }
+        Ok(res)
+    }
+
+    pub fn to_array(&self) -> [i32; 81] {
+        let mut res = [-1; 81];
+        for row in 0..9 {
+            for col in 0..9 {
+                if let SudokuTileState::Set(x) = self.board[row][col] {
+                    res[(row * 9) + col] = x as i32;
                 }
             }
         }

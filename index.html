@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src='pkg/sudoku.js'></script>
+  <script> 
+    const { complete_sudoku } = wasm_bindgen;
+    (async () => {
+      await wasm_bindgen('./pkg/sudoku_bg.wasm');
+      let response = await fetch('https://sugoku.herokuapp.com/board?difficulty=easy');
+      let raw_json = await response.json();
+      let data = raw_json.board.reduce((arr, curr) => arr.concat(curr));
+      let res = complete_sudoku(data);
+      console.log(res);
+    })();
+  </script>
+</head>
+<body>
+  <p>test</p>
+</body>
+</html>

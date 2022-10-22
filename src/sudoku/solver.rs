@@ -1,14 +1,6 @@
 use super::*;
 
 impl Sudoku {
-    fn get_random_unset(&self) -> Option<Position> {
-        if self.unset_positions.is_empty() {
-            return None;
-        }
-        let index = thread_rng().gen_range(0..self.unset_positions.len());
-        self.unset_positions.iter().nth(index).map(|x| *x)
-    }
-
     fn get_random_from_states(
         &self,
         states: EnumSet<SudokuTile>,
@@ -27,13 +19,6 @@ impl Sudoku {
         match self.board[position.row][position.col] {
             SudokuTileState::Set(_) => Result::Err(SudokuError::BoardHashMapDisagreement),
             SudokuTileState::Unset(x) => self.get_random_from_states(x),
-        }
-    }
-
-    pub fn add_random(&mut self) -> Result<SudokuTile, SudokuError> {
-        match self.get_random_unset() {
-            Some(position) => self.update_random_value(position),
-            None => Result::Err(SudokuError::BoardFull),
         }
     }
 

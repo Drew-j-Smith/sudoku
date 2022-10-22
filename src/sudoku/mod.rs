@@ -1,7 +1,7 @@
 use enumset::EnumSet;
 use enumset::EnumSetType;
+use num_derive::FromPrimitive;
 use rand;
-use rand::thread_rng;
 use rand::Rng;
 use std::collections::HashSet;
 use std::fmt;
@@ -9,7 +9,7 @@ use std::fmt;
 mod solver;
 mod util;
 
-#[derive(EnumSetType)]
+#[derive(EnumSetType, FromPrimitive)]
 pub enum SudokuTile {
     One = 1,
     Two = 2,
