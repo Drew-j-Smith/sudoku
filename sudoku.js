@@ -20,10 +20,10 @@ const { complete_sudoku } = wasm_bindgen;
     let response = await fetch('https://sugoku.herokuapp.com/board?difficulty=easy');
     let raw_json = await response.json();
     let data = raw_json.board.reduce((arr, curr) => arr.concat(curr));
-    document.getElementById("unsolved").append(createNode(data));
+    document.getElementById("unsolved").insertAdjacentElement('afterend', createNode(data));
 
     let res = complete_sudoku(data);
     console.log(res);
 
-    document.getElementById("solved").append(createNode(res));
+    document.getElementById("solved").insertAdjacentElement('afterend', createNode(res));
 })();
